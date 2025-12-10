@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Demonstrativo XSS</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #2c3e50; color: #333; padding: 20px; }
+        h1 { color: #ecf0f1; text-align: center; }
+        
+     
+        .secao-ataque {
+            background: #ecf0f1;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 10px solid;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+      
+        .refletido { border-color: #e74c3c; } 
+        .dom { border-color: #f1c40f; }       
+        .persistente { border-color: #8e44ad; } 
+
+        h2 { margin-top: 0; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; }
+        
+        .btn-busca { background-color: #f39c12; }
+        .btn-postar { background-color: #8e44ad; }
+        .btn-limpar { background-color: #7f8c8d; margin-top: 5px;}
+
+        .resultado-box { 
+            background: #fff; 
+            border: 1px dashed #999; 
+            padding: 10px; 
+            margin-top: 10px; 
+            min-height: 30px; 
+            word-break: break-all;
+        }
+
+        code { background: #333; color: #0f0; padding: 2px 5px; border-radius: 3px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+    <h1>Site vulnerável a ataques XSS</h1>
+
+    <div class="secao-ataque refletido">
+        <h2>1. XSS Refletido (Via URL)</h2>
+        
+        <p><strong>Copie este código: <code>?msg=&lt;img src=x onerror=alert('ATAQUE_XSS_REFLETIDO')&gt;</code> e cole no final da URL para simular um Link "Malcioso".</strong></p>
+        
+        <p> <strong>Para remover o "Ataque", apenas apague  <code>?msg=&lt;img src=x onerror=alert('ATAQUE_XSS_REFLETIDO')&gt;</code> do final da URL.</strong></p>
+        <div id="resultado-refletido" class="resultado-box">
+            (Aguardando parâmetro na URL...)
+        </div>
+    </div>
+
+    <div class="secao-ataque dom">
+        <h2>2. XSS Baseado em DOM (Campo de Busca)</h2>
+        <p>Coloque no campo de busca a seguinte mensagem: <code>&lt;img src=x onerror=alert('ATAQUE_XSS_DOM')&gt;</code></p>
+        
+        <input type="text" id="input-dom" placeholder="Digite aqui o que deseja pesquisar...">
+        <button onclick="ataqueDom()" class="btn-busca">Pesquisar</button>
+
+        <div id="resultado-dom" class="resultado-box"></div>
+    </div>
+
+    <div class="secao-ataque persistente">
+        <h2>3. XSS Persistente (Comentários)</h2>
+        
+        <p>O que você digitar aqui fica salvo. Se fechar o navegador e voltar, o ataque acontece de novo.</p>
+        <p>Para testar o ataque Persistente, coloque o seguinte comentário:<code>&lt;img src=x onerror=alert('ATAQUE_XSS_PERSISTENTE')&gt;</code> </p>
+        <p><strong>O "Ataque" irá permanecer até o comentário ser limpo.</strong></p>
+        
+        <textarea id="input-persistente" placeholder="Digite aqui seu comentário..."></textarea>
+        <button onclick="postarComentario()" class="btn-postar">Postar Comentário</button>
+        <button onclick="limparBanco()" class="btn-limpar">Limpar todos os comentarios</button>
+
+        <div id="lista-comentarios">
+            </div>
+    </div>
+
+    <script>
+        // --- LÓGICA DO REFLETIDO ---
+        // Vulnerabilidade: pega o que está na URL e joga na tela
+        const params = new URLSearchParams(window.location.search);
+        const msg = params.get('msg');
+        if (msg) {
+            document.getElementById('resultado-refletido').innerHTML = "<b>Você sofreu o Ataque XSS refletido.</b> " + msg;
+        }
+
+        // --- LÓGICA DO DOM-BASED ---
+        // Vulnerabilidade: Pega o input e joga na tela 
+        function ataqueDom() {
+            const input = document.getElementById('input-dom').value;
+            const div = document.getElementById('resultado-dom');
+            div.innerHTML = "Resultados da pesquisa para: " + input;
+        }
+
+        // --- LÓGICA DO PERSISTENTE ---
+        // Salva no LocalStorage do navegador simulando um banco de dados ou servidor e carrega as mensagens sempre que abre a página.
+        // IMPORTANTE: Salvar os dados no LocalStorage do navegador para simular o banco de dados/servidor é uma prática didática!
+        // Em casos reais, o ataque XSS Persistente é feito direto em banco de dados e servidores.
+        function carregarComentarios() {
+            const lista = JSON.parse(localStorage.getItem('banco_vulneravel')) || [];
+            const div = document.getElementById('lista-comentarios');
+            div.innerHTML = ""; 
+            
+            lista.forEach(texto => {
+                // Vulnerabilidade: Inserindo HTML salvo direto na tela
+                div.innerHTML += `<div class="resultado-box" style="background:#f3e5f5;">${texto}</div>`;
+            });
+        }
+
+        function postarComentario() {
+            const texto = document.getElementById('input-persistente').value;
+            let lista = JSON.parse(localStorage.getItem('banco_vulneravel')) || [];
+            
+            lista.push(texto);
+            localStorage.setItem('banco_vulneravel', JSON.stringify(lista));
+            
+            carregarComentarios();
+            document.getElementById('input-persistente').value = ""; 
+        }
+
+        function limparBanco() {
+            localStorage.removeItem('banco_vulneravel');
+            location.reload(); 
+        }
+
+        carregarComentarios();
+
+    </script>
+</body>
+</html>
