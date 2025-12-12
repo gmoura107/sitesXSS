@@ -41,7 +41,7 @@ O laboratório cobre os três tipos principais de XSS:
 ---
 
 ## Contramedida utilizada: Sanitização
-No arquivo `seguro.html`, implementamos uma função de sanitização que atua como **Contramedida**.
+No arquivo `siteXSSprotegido.html`, implementamos uma função de sanitização que atua como **Contramedida**.
 
 ```javascript
 function sanitizar(texto) {
