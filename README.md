@@ -19,23 +19,23 @@ O laboratório cobre os três tipos principais de XSS:
 
 ### 1. XSS Refletido 
 * **Como funciona:** O ataque é entregue via URL. O site lê os parâmetros do link e os exibe na tela sem limpeza.
-* **Payload de Teste:** Adicione ao final da URL:
+* **Adicione ao final da URL:** Adicione ao final da URL:
     ```
-    ?msg=<img src=x onerror=alert('REFLETIDO')>
+    ?msg=<img src=x onerror=alert('ATAQUE_XSS_REFLETIDO')>
     ```
 
 ### 2. XSS Persistente 
 * **Como funciona:** O script malicioso é "salvo" no armazenamento. Mesmo recarregando a página ou fechando o navegador, o script executa automaticamente ao abrir o site.
 * **Faça o seguinte comentário:**
     ```html
-    <img src=x onerror=alert('PERSISTENTE')>
+    <img src=x onerror=alert('ATAQUE_XSS_PERSISTENTE')>
     ```
 
 ### 3. XSS Baseado em DOM 
 * **Como funciona:** A falha ocorre inteiramente no processamento do JavaScript no lado do cliente. O dado entra por um campo de input e é inserido no HTML via `innerHTML`.
 * **Coloque o seguinte código no campo de busca:**
     ```html
-    <img src=x onerror=alert('DOM_BASED')>
+    <img src=x onerror=alert('ATAQUE_XSS_DOM')>
     ```
 
 ---
